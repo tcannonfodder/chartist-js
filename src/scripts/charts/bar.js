@@ -223,6 +223,9 @@
     var zeroPoint = options.horizontalBars ? (chartRect.x1 + valueAxis.projectValue(0)) : (chartRect.y1 - valueAxis.projectValue(0));
     // Used to track the screen coordinates of stacked bars
     var stackedBarValues = [];
+    //If the grid mode is set to 'overlap-bipolar', the bars are divided into two different stacks
+    var positiveStackedBarValues = [];
+    var negativeStackedBarValues = [];
 
     labelAxis.createGridAndLabels(gridGroup, labelGroup, this.supportsForeignObject, options, this.eventEmitter);
     valueAxis.createGridAndLabels(gridGroup, labelGroup, this.supportsForeignObject, options, this.eventEmitter);
@@ -323,7 +326,7 @@
         var positions = {};
         positions[labelAxis.units.pos + '1'] = projected[labelAxis.units.pos];
         positions[labelAxis.units.pos + '2'] = projected[labelAxis.units.pos];
-        
+
         if(options.stackBars && (options.stackMode === 'accumulate' || !options.stackMode)) {
           // Stack mode: accumulate (default)
           // If bars are stacked we use the stackedBarValues reference and otherwise base all bars off the zero line
@@ -331,11 +334,24 @@
           // to be the original behaviour (accumulate)
           positions[labelAxis.counterUnits.pos + '1'] = previousStack;
           positions[labelAxis.counterUnits.pos + '2'] = stackedBarValues[valueIndex];
-        } else {          
+        } else if(options.stackBars && (options.stackMode === 'overlap-bipolar')){
+          var position2;
+
+          if(value && (value.x > 0 || value.y > 0)){
+            previousStack = positiveStackedBarValues[valueIndex] || zeroPoint;
+            position2 = positiveStackedBarValues[valueIndex] = previousStack - (zeroPoint - projected[labelAxis.counterUnits.pos]);
+          } else{
+            previousStack = negativeStackedBarValues[valueIndex] || zeroPoint;
+            position2 = negativeStackedBarValues[valueIndex] = previousStack - (zeroPoint - projected[labelAxis.counterUnits.pos]);
+          }
+
+          positions[labelAxis.counterUnits.pos + '1'] = previousStack;
+          positions[labelAxis.counterUnits.pos + '2'] = position2;
+        } else {
           // Draw from the zero line normally
           // This is also the same code for Stack mode: overlap
           positions[labelAxis.counterUnits.pos + '1'] = zeroPoint;
-          positions[labelAxis.counterUnits.pos + '2'] = projected[labelAxis.counterUnits.pos];        
+          positions[labelAxis.counterUnits.pos + '2'] = projected[labelAxis.counterUnits.pos];
         }
 
         // Limit x and y so that they are within the chart rect

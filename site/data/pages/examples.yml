@@ -173,6 +173,15 @@ sections:
                     <code>stackBars</code> property in your configuration.
       - type: live-example
         data:
+          title: Stacked bi-polar bar chart
+          level: 4
+          id: stacked-bipolar-bar
+          classes: ct-golden-section
+          intro: >
+                    Setup a bi-polar stacked bar
+                    <code>stackBars</code> property in your configuration.
+      - type: live-example
+        data:
           title: Horizontal bar chart
           level: 4
           id: example-bar-horizontal
